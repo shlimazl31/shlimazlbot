@@ -2,9 +2,11 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "../../auth/[...nextauth]/auth";
 
+const BOT_API_URL = "https://benbotdegilimbotu-production.up.railway.app";
+
 export async function GET(
   request: Request,
-  { params }: { params: { guildId: string } }
+  context: { params: { guildId: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -13,8 +15,10 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { guildId } = context.params;
+
     // Bot API'sinden müzik durumunu al
-    const response = await fetch(`${process.env.NEXTAUTH_URL}/api/bot/music?guildId=${params.guildId}`);
+    const response = await fetch(`${BOT_API_URL}/api/bot/music?guildId=${guildId}`);
     if (!response.ok) {
       throw new Error("Failed to fetch music state from bot");
     }
@@ -32,7 +36,7 @@ export async function GET(
 
 export async function POST(
   request: Request,
-  { params }: { params: { guildId: string } }
+  context: { params: { guildId: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -41,11 +45,12 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { guildId } = context.params;
     const body = await request.json();
     const { action, value } = body;
 
     // Bot API'sine komut gönder
-    const response = await fetch(`${process.env.NEXTAUTH_URL}/api/bot/music?guildId=${params.guildId}`, {
+    const response = await fetch(`${BOT_API_URL}/api/bot/music?guildId=${guildId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
